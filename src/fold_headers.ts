@@ -9,7 +9,6 @@
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
-"use strict";
 
 
 
@@ -60,7 +59,7 @@ function procHeader(item: Element) {
     item.classList.add("section-title");
     let elem = document.createElement("button");
     elem.innerText = "fold";
-    elem.addEventListener("click", function() {
+    elem.addEventListener("click", function () {
         let section = this.parentElement.parentElement;
         // Folded: expand it
         if (section.classList.contains("folded")) {
@@ -76,28 +75,29 @@ function procHeader(item: Element) {
 
 
 
-// Replace all children
-function replaceChild(par: HTMLElement) {
-    for (let node of par.getElementsByClassName("cooked")) {
-        node.replaceChildren(...foldHeaders(node));
-    }
-}
-replaceChild(document.body);
-
-const bodyobserver = new MutationObserver(function(mutlist) {
-    for (const mut of mutlist) {
-        let classes = (mut.target as HTMLElement).classList;
-        if (classes.contains('topic-post') || classes.contains('cloaked-post')) {
-            replaceChild(mut.target as HTMLElement);
+(function () {
+    // Replace all children
+    function replaceChild(par: HTMLElement) {
+        for (let node of par.getElementsByClassName("cooked")) {
+            node.replaceChildren(...foldHeaders(node));
         }
     }
-});
-bodyobserver.observe(document.getElementsByClassName("post-stream")[0], { subtree: true, childList: true, });
+    replaceChild(document.body);
+
+    const bodyobserver = new MutationObserver(function (mutlist) {
+        for (const mut of mutlist) {
+            let classes = (mut.target as HTMLElement).classList;
+            if (classes.contains('topic-post') || classes.contains('cloaked-post')) {
+                replaceChild(mut.target as HTMLElement);
+            }
+        }
+    });
+    bodyobserver.observe(document.getElementsByClassName("post-stream")[0], {subtree: true, childList: true, });
 
 
-// Add styles for folding and expanding
-let styles = document.createElement("style");
-styles.innerText = `
+    // Add styles for folding and expanding
+    let styles = document.createElement("style");
+    styles.innerText = `
 .titled-section.folded::after {
     content: "...";
     display: block;
@@ -114,5 +114,6 @@ styles.innerText = `
     max-height: 0;
 }
 `;
-document.head.appendChild(styles);
+    document.head.appendChild(styles);
+})()
 

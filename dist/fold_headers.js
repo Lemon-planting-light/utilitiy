@@ -9,7 +9,6 @@
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
-"use strict";
 function foldHeaders(section) {
     const LvMap = (() => {
         let res = new Map();
@@ -70,25 +69,26 @@ function procHeader(item) {
     });
     item.append(" ", elem);
 }
-// Replace all children
-function replaceChild(par) {
-    for (let node of par.getElementsByClassName("cooked")) {
-        node.replaceChildren(...foldHeaders(node));
-    }
-}
-replaceChild(document.body);
-const bodyobserver = new MutationObserver(function (mutlist) {
-    for (const mut of mutlist) {
-        let classes = mut.target.classList;
-        if (classes.contains('topic-post') || classes.contains('cloaked-post')) {
-            replaceChild(mut.target);
+(function () {
+    // Replace all children
+    function replaceChild(par) {
+        for (let node of par.getElementsByClassName("cooked")) {
+            node.replaceChildren(...foldHeaders(node));
         }
     }
-});
-bodyobserver.observe(document.getElementsByClassName("post-stream")[0], { subtree: true, childList: true, });
-// Add styles for folding and expanding
-let styles = document.createElement("style");
-styles.innerText = `
+    replaceChild(document.body);
+    const bodyobserver = new MutationObserver(function (mutlist) {
+        for (const mut of mutlist) {
+            let classes = mut.target.classList;
+            if (classes.contains('topic-post') || classes.contains('cloaked-post')) {
+                replaceChild(mut.target);
+            }
+        }
+    });
+    bodyobserver.observe(document.getElementsByClassName("post-stream")[0], { subtree: true, childList: true, });
+    // Add styles for folding and expanding
+    let styles = document.createElement("style");
+    styles.innerText = `
 .titled-section.folded::after {
     content: "...";
     display: block;
@@ -105,4 +105,5 @@ styles.innerText = `
     max-height: 0;
 }
 `;
-document.head.appendChild(styles);
+    document.head.appendChild(styles);
+})();
